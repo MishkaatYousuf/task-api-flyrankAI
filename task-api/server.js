@@ -33,6 +33,13 @@ if (row.count === 0) {
 }
 
 app.get("/tasks", (req,res)=>{
+    const rows = db.prepare("SELECT * FROM tasks").all();
+
+    const tasks = rows.map(task => ({
+        ...task,
+        done: Boolean(task.done)
+    }));
+
     res.json(tasks);
 });
 
@@ -40,13 +47,19 @@ app.get("/tasks/:id",(req,res)=>{
 
     const id = Number(req.params.id);
 
-    const task = tasks.find(t=>t.id===id);
+    const task = db
+        .prepare("SELECT * FROM tasks WHERE id=?")
+        .get(id);
 
     if(!task){
+
         return res.status(404).json({
-            error:`Task ${id} not found`
+            error:"Task not found"
         });
+
     }
+
+    task.done = Boolean(task.done);
 
     res.json(task);
 
