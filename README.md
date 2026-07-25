@@ -36,3 +36,13 @@ Curl output:
 Swagger UI:
 <img width="979" height="502" alt="image" src="https://github.com/user-attachments/assets/7fc622c1-ae8a-4fe1-8460-d4a342ec79b1" />
 
+Database: 
+This project uses SQLite as its database.
+SQLite stores all data inside a single file: tasks.db
+
+The database is automatically created when the application starts.
+
+SQL Example:
+SELECT * FROM tasks;
+<img width="840" height="565" alt="image" src="https://github.com/user-attachments/assets/a566989d-00c5-4152-9028-0d0ebcdf8071" />
+
