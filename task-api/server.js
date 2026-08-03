@@ -12,11 +12,13 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
 const {
-    initializeDatabase
+    initializeDatabase,
+    getAllTasks,
+    getTaskById
 } = require("./repository/tasksRepository");
 
-app.get("/tasks", (req,res)=>{
-    const rows = db.prepare("SELECT * FROM tasks").all();
+app.get("/tasks", async (req,res)=>{
+    const rows = await getAllTasks();
 
     const tasks = rows.map(task => ({
         ...task,
@@ -26,13 +28,11 @@ app.get("/tasks", (req,res)=>{
     res.json(tasks);
 });
 
-app.get("/tasks/:id",(req,res)=>{
+app.get("/tasks/:id", async(req,res)=>{
 
     const id = Number(req.params.id);
 
-    const task = db
-        .prepare("SELECT * FROM tasks WHERE id=?")
-        .get(id);
+    const task = await getTaskById(id);
 
     if(!task){
 
