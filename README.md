@@ -1,22 +1,115 @@
 # Task API
 
-Simple CRUD API built with Express.js.
+A RESTful Task Management API built with **Node.js**, **Express**, and **PostgreSQL**. The API supports full CRUD (Create, Read, Update, Delete) operations on tasks and is containerized using Docker and Docker Compose.
 
-## Installation
+## Features
 
-npm install
+- Full CRUD API
+- PostgreSQL database
+- Docker & Docker Compose support
+- Automatic database initialization
+- Automatic seeding with example tasks
+- Swagger API documentation
+- Environment variable configuration
 
-## Run
+---
 
-npm start
+# Tech Stack
 
-Server runs at
+- Node.js
+- Express.js
+- PostgreSQL
+- pg (PostgreSQL driver)
+- Docker
+- Docker Compose
+- Swagger UI
 
+---
+
+# Project Structure
+
+```
+task-api/
+│
+├── repository/
+│   └── tasksRepository.js
+│
+├── server.js
+├── openapi.json
+├── package.json
+├── Dockerfile
+├── compose.yaml
+├── .env.example
+├── .gitignore
+└── README.md
+```
+---
+
+# Environment Variables
+
+Copy the example file:
+
+### Linux / macOS
+
+```bash
+cp .env.example .env
+```
+
+### Windows Command Prompt
+
+```cmd
+copy .env.example .env
+```
+
+Contents of `.env.example`
+
+```env
+DATABASE_URL=postgres://postgres:dev@localhost:5432/tasks
+```
+
+---
+
+# Running the Project
+
+## Using Docker Compose (Recommended)
+
+Start the complete stack:
+
+```bash
+docker compose up
+```
+
+or, if running for the first time:
+
+```bash
+docker compose up --build
+```
+
+The API will be available at:
+
+```
 http://localhost:3000
+```
 
-Swagger
+Swagger:
 
 http://localhost:3000/docs
+
+## Running Without Docker
+
+Start PostgreSQL separately.
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the server:
+
+```bash
+npm start
+```
 
 Endpoint Table:
 
@@ -36,20 +129,76 @@ Curl output:
 Swagger UI:
 <img width="979" height="502" alt="image" src="https://github.com/user-attachments/assets/7fc622c1-ae8a-4fe1-8460-d4a342ec79b1" />
 
-Database:
-This project uses SQLite as its database.
-SQLite stores all data inside a single file: tasks.db
+# Database Initialization
 
-The database is automatically created when the application starts.
+On startup the application automatically:
 
-SQL Example:
-SELECT \* FROM tasks;
-<img width="840" height="565" alt="image" src="https://github.com/user-attachments/assets/a566989d-00c5-4152-9028-0d0ebcdf8071" />
+1. Connects to PostgreSQL.
+2. Creates the `tasks` table if it does not already exist.
+3. Seeds three example tasks only if the table is empty.
 
-## Running PostgreSQL
+Restarting the application does **not** create duplicate seed data.
 
-Start PostgreSQL using Docker: docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql/data -d postgres
+---
 
-To verify the container: docker ps
+# Docker
 
-To connect to PostgreSQL: docker exec -it taskdb psql -U postgres -d tasks
+The project uses two services:
+
+- **api** – Express application
+- **db** – PostgreSQL database
+
+The PostgreSQL data is stored in a Docker volume named:
+
+```
+taskdata
+```
+
+This ensures that data persists even after stopping and restarting the containers.
+
+---
+
+# Verification
+
+After starting the application:
+
+Open
+
+```
+http://localhost:3000/tasks
+```
+
+You should see the seeded tasks.
+
+Swagger documentation is available at
+
+```
+http://localhost:3000/docs
+```
+
+---
+
+# Database Screenshot
+
+Includes screenshots showing:
+
+- `\dt`
+- `SELECT * FROM tasks;`
+
+<img width="979" height="618" alt="image" src="https://github.com/user-attachments/assets/82300ecf-8ea7-4602-afcd-206548751d9a" />
+
+
+---
+
+# Repository
+
+Push the completed project to your public GitHub repository.
+
+A fresh clone should work by running:
+
+```bash
+cp .env.example .env
+docker compose up
+```
+
+without requiring any manual database setup.
