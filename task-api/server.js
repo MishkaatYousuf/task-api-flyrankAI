@@ -14,7 +14,10 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 const {
     initializeDatabase,
     getAllTasks,
-    getTaskById
+    getTaskById,
+    createTask,
+    updateTask,
+    deleteTask
 } = require("./repository/tasksRepository");
 
 app.get("/tasks", async (req,res)=>{
@@ -56,9 +59,9 @@ app.get("/", (req, res) => {
     });
 });
 
-app.post("/tasks",(req,res)=>{
+app.post("/tasks", async (req, res) => {
 
-    const {title}=req.body;
+    const {title} = req.body;
 
     if(!title || title.trim()===""){
 
@@ -68,31 +71,16 @@ app.post("/tasks",(req,res)=>{
 
     }
 
-    const result = db.prepare(
-
-        "INSERT INTO tasks(title,done) VALUES (?,?)"
-
-    ).run(title,0);
-
-    const newTask = db.prepare(
-
-        "SELECT * FROM tasks WHERE id=?"
-
-    ).get(result.lastInsertRowid);
-
-    newTask.done = Boolean(newTask.done);
+    const newTask = await createTask(title);
 
     res.status(201).json(newTask);
-
 });
 
-app.put("/tasks/:id",(req,res)=>{
+app.put("/tasks/:id", async (req,res)=>{
 
     const id = Number(req.params.id);
 
-    const task = db.prepare(
-        "SELECT * FROM tasks WHERE id=?"
-    ).get(id);
+    const task = await getTaskById(id);
 
     if(!task){
 
@@ -101,7 +89,6 @@ app.put("/tasks/:id",(req,res)=>{
         });
 
     }
-
     const title =
         req.body.title ?? task.title;
 
@@ -116,40 +103,26 @@ app.put("/tasks/:id",(req,res)=>{
 
     }
 
-    db.prepare(
-
-        "UPDATE tasks SET title=?, done=? WHERE id=?"
-
-    ).run(title, done ? 1 : 0, id);
-
-    const updated = db.prepare(
-
-        "SELECT * FROM tasks WHERE id=?"
-
-    ).get(id);
-
-    updated.done = Boolean(updated.done);
+    const updated = await updateTask(
+        id,
+        title,
+        done
+    );
 
     res.json(updated);
 
 });
 
-app.delete("/tasks/:id",(req,res)=>{
+app.delete("/tasks/:id", async (req,res)=>{
 
     const id = Number(req.params.id);
 
-    const result = db.prepare(
+    const deleted = await deleteTask(id);
 
-        "DELETE FROM tasks WHERE id=?"
-
-    ).run(id);
-
-    if(result.changes===0){
-
+    if (deleted === 0) {
         return res.status(404).json({
-            error:"Task not found"
+            error: "Task not found"
         });
-
     }
 
     res.status(204).send();

@@ -53,10 +53,48 @@ async function getTaskById(id) {
     return result.rows[0];
 
 }
+async function createTask(title) {
 
+    const result = await pool.query(
+        `INSERT INTO tasks(title, done)
+         VALUES ($1, $2)
+         RETURNING *`,
+        [title, false]
+    );
+
+    return result.rows[0];
+
+}
+async function updateTask(id, title, done) {
+
+    const result = await pool.query(
+        `UPDATE tasks
+         SET title = $1,
+             done = $2
+         WHERE id = $3
+         RETURNING *`,
+        [title, done, id]
+    );
+
+    return result.rows[0];
+
+}
+async function deleteTask(id) {
+
+    const result = await pool.query(
+        "DELETE FROM tasks WHERE id = $1",
+        [id]
+    );
+
+    return result.rowCount;
+
+}
 module.exports = {
     pool,
     initializeDatabase,
     getAllTasks,
-    getTaskById
+    getTaskById,
+    createTask,
+    updateTask,
+    deleteTask
 };
