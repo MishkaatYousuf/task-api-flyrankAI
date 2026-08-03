@@ -6,8 +6,31 @@ const pool = new Pool({
 
 async function initializeDatabase() {
 
+    // Wait for PostgreSQL to become available
+    for (let attempt = 1; attempt <= 10; attempt++) {
+
+        try {
+
+            await pool.query("SELECT 1");
+
+            console.log("Connected to PostgreSQL.");
+
+            break;
+
+        } catch (err) {
+
+            console.log(`Waiting for PostgreSQL... (${attempt}/10)`);
+
+            if (attempt === 10) {
+                throw err;
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+    }
+
     await pool.query(`
-        CREATE TABLE IF NOT EXISTS tasks(
+        CREATE TABLE IF NOT EXISTS tasks (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             done BOOLEAN NOT NULL DEFAULT FALSE
@@ -21,6 +44,7 @@ async function initializeDatabase() {
     const count = Number(result.rows[0].count);
 
     if (count === 0) {
+
         await pool.query(`
             INSERT INTO tasks(title, done)
             VALUES
@@ -28,6 +52,8 @@ async function initializeDatabase() {
             ('Build CRUD API', false),
             ('Read Swagger Docs', true);
         `);
+
+        console.log("Seeded example tasks.");
     }
 }
 
